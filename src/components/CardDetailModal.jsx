@@ -9,8 +9,6 @@ import {
   deleteTask,
   createComment,
   deleteComment,
-  updateProject,
-  updateGoal,
 } from "@/lib/firestoreService";
 import { X, Plus, Trash2, MessageSquare, CheckSquare, Circle, Send, Paperclip, ExternalLink } from "lucide-react";
 

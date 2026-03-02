@@ -22,7 +22,7 @@ export default function ModeModule() {
   const load = () => setCards([]);
   const uploadImage = async () => {};
   const save = async () => { setShowForm(false); setEditId(null); };
-  const remove = async () => {};
+  const remove = async (_id) => {};
 
   const startEdit = (card) => {
     setForm({ title: card.title, season: card.season, notes: card.notes || "", image_url: card.image_url || "" });

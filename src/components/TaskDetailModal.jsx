@@ -9,7 +9,7 @@ import {
   createComment,
   deleteComment,
 } from "@/lib/firestoreService";
-import { X, Plus, Trash2, CheckSquare, Send, MessageSquare, Check } from "lucide-react";
+import { X, Plus, Trash2, Send, MessageSquare, Check } from "lucide-react";
 
 export default function TaskDetailModal({ task, onClose, onUpdate }) {
   const { user } = useAuth();

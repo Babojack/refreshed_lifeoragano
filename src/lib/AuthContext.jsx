@@ -14,7 +14,7 @@ import {
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { getFirestoreDb } from "@/lib/firebase";
 
-const AuthContext = createContext();
+const AuthContext = createContext(undefined);
 
 export const AuthProvider = ({ children }) => {
   const [firebaseUser, setFirebaseUser] = useState(null);

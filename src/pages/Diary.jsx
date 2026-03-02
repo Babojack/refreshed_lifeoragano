@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, BookOpen, Trash2, Eye, EyeOff, Edit3, X, Check } from "lucide-react";
+import { Plus, BookOpen, Trash2, EyeOff, Edit3, X, Check } from "lucide-react";
 
 const moodEmoji = { great: "😄", good: "🙂", okay: "😐", bad: "😕", terrible: "😞" };
 
@@ -9,7 +9,7 @@ export default function Diary() {
   const [showForm, setShowForm] = useState(false);
   const [selected, setSelected] = useState(null);
   const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({});
+  const [editForm, setEditForm] = useState({ title: "", content: "" });
   const [form, setForm] = useState({ title: "", content: "", date: new Date().toISOString().slice(0, 10), mood: "", is_private: true });
 
   useEffect(() => { loadEntries(); }, []);
@@ -21,7 +21,7 @@ export default function Diary() {
 
   const createEntry = async () => { setShowForm(false); };
   const saveEdit = async () => { setEditingId(null); };
-  const deleteEntry = async () => {};
+  const deleteEntry = async (_id) => {};
 
   return (
     <div className="p-6 max-w-5xl mx-auto">

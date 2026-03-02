@@ -14,9 +14,9 @@ export default function WishlistModule() {
   const load = () => setItems([]);
   const uploadImage = async () => {};
   const save = async () => { setShowForm(false); };
-  const remove = async () => {};
-  const addComment = async () => {};
-  const deleteComment = async () => {};
+  const remove = async (_id) => {};
+  const addComment = async (_item) => {};
+  const deleteComment = async (_item, _index) => {};
 
   return (
     <div>

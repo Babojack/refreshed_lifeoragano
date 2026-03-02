@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { getHabits, createHabit, deleteHabit } from "@/lib/firestoreService";
-import { Plus, X, Check, Flame } from "lucide-react";
+import { X, Check, Flame } from "lucide-react";
 
 function useNow() {
   const [now, setNow] = useState(new Date());
@@ -14,7 +14,7 @@ function useNow() {
 
 function TimeSince({ start }) {
   const now = useNow();
-  const diff = now - new Date(start);
+  const diff = Number(now) - Number(new Date(start));
   const totalSeconds = Math.floor(diff / 1000);
   const days = Math.floor(totalSeconds / 86400);
   const hours = Math.floor((totalSeconds % 86400) / 3600);

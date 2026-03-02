@@ -27,14 +27,14 @@ export default function Feed() {
 
   const handleImageUpload = async () => {};
   const createPost = async () => {};
-  const toggleLike = async () => {};
-  const deletePost = async () => {};
-  const isLiked = () => false;
+  const toggleLike = async (_post) => {};
+  const deletePost = async (_postId) => {};
+  const isLiked = (_post) => false;
   const toggleComments = async (postId) => {
     setOpenComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
   };
-  const postComment = async () => {};
-  const deleteComment = async () => {};
+  const postComment = async (_postId) => {};
+  const deleteComment = async (_postId, _commentId) => {};
 
   const typeColors = {
     text: "bg-gray-100 text-gray-600",

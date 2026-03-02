@@ -134,7 +134,7 @@ export default function Goals() {
                     max="100"
                     className="w-full border border-[#E8E8E0] rounded-lg px-3 py-2.5 text-sm focus:outline-none bg-[#F5F5F0]"
                     value={form.progress}
-                    onChange={(e) => setForm({ ...form, progress: e.target.value })}
+                    onChange={(e) => setForm({ ...form, progress: Number(e.target.value) || 0 })}
                   />
                 </div>
               </div>
