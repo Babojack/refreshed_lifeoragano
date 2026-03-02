@@ -15,6 +15,7 @@ export default function Feed() {
   const { user } = useAuth();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({ content: "", image_url: "", status_emoji: "", status_text: "", post_type: "text" });
   const [comments, setComments] = useState({});
   const [openComments, setOpenComments] = useState({});
