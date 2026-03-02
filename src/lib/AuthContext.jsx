@@ -8,6 +8,8 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { getFirestoreDb } from "@/lib/firebase";
@@ -27,9 +29,24 @@ export const AuthProvider = ({ children }) => {
     return snap.exists() ? snap.data() : {};
   };
 
+  const isLocalDev =
+    typeof window !== "undefined" &&
+    window.location.hostname === "localhost" &&
+    import.meta.env.DEV;
+
+  const MOCK_USER = {
+    uid: "local-dev",
+    email: "dev@local",
+    displayName: "Lokaler Nutzer",
+  };
+
   useEffect(() => {
     const auth = getFirebaseAuth();
     if (!auth) {
+      if (isLocalDev) {
+        setFirebaseUser(MOCK_USER);
+        setProfile({ name: MOCK_USER.displayName, goal: "" });
+      }
       setIsLoadingAuth(false);
       return;
     }
@@ -43,7 +60,7 @@ export const AuthProvider = ({ children }) => {
       setIsLoadingAuth(false);
     });
     return () => unsub();
-  }, []);
+  }, [isLocalDev]);
 
   const refreshProfile = async () => {
     if (firebaseUser?.uid) {
@@ -70,6 +87,25 @@ export const AuthProvider = ({ children }) => {
     const auth = getFirebaseAuth();
     if (!auth) throw new Error("Firebase nicht konfiguriert");
     await signInWithEmailAndPassword(auth, email, password);
+  };
+
+  const loginWithGoogle = async () => {
+    const auth = getFirebaseAuth();
+    if (!auth) throw new Error("Firebase nicht konfiguriert");
+    const provider = new GoogleAuthProvider();
+    const { user: u } = await signInWithPopup(auth, provider);
+    const db = getFirestoreDb();
+    if (db && u) {
+      await setDoc(
+        doc(db, "users", u.uid),
+        {
+          name: u.displayName || u.email?.split("@")[0] || "User",
+          goal: "",
+          updated_at: new Date(),
+        },
+        { merge: true }
+      );
+    }
   };
 
   const signup = async (email, password, displayName = "") => {
@@ -110,6 +146,7 @@ export const AuthProvider = ({ children }) => {
         appPublicSettings: null,
         isLoadingPublicSettings: false,
         login,
+        loginWithGoogle,
         signup,
         logout,
         navigateToLogin,
