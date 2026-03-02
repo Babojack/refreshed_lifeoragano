@@ -28,49 +28,90 @@ function getCol(name) {
   return collection(db, name);
 }
 
+function toMillis(v) {
+  if (!v) return 0;
+  if (typeof v === "number") return v;
+  if (v instanceof Date) return v.getTime();
+  if (typeof v?.toDate === "function") return v.toDate().getTime(); // Firestore Timestamp
+  if (typeof v?.seconds === "number") return v.seconds * 1000;
+  return 0;
+}
+
+async function safeGetDocs(primaryQuery, fallbackQuery) {
+  try {
+    return await getDocs(primaryQuery);
+  } catch (e) {
+    const code = e?.code || e?.name || "";
+    // Firestore often throws failed-precondition for missing composite index.
+    if (fallbackQuery && (code === "failed-precondition" || code === "FirebaseError")) {
+      try {
+        return await getDocs(fallbackQuery);
+      } catch (_) {
+        throw e;
+      }
+    }
+    throw e;
+  }
+}
+
 export async function getProjects(userId) {
   const col = getCol("projects");
   if (!col) return [];
-  const q = query(col, where("userId", "==", userId), orderBy("created_date", "desc"));
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const primary = query(col, where("userId", "==", userId), orderBy("created_date", "desc"));
+  const fallback = query(col, where("userId", "==", userId));
+  const snap = await safeGetDocs(primary, fallback);
+  const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  rows.sort((a, b) => toMillis(b.created_date) - toMillis(a.created_date));
+  return rows;
 }
 
 export async function getTasks(userId) {
   const col = getCol("tasks");
   if (!col) return [];
-  const q = query(col, where("userId", "==", userId), orderBy("created_date", "desc"));
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const primary = query(col, where("userId", "==", userId), orderBy("created_date", "desc"));
+  const fallback = query(col, where("userId", "==", userId));
+  const snap = await safeGetDocs(primary, fallback);
+  const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  rows.sort((a, b) => toMillis(b.created_date) - toMillis(a.created_date));
+  return rows;
 }
 
 export async function getGoals(userId) {
   const col = getCol("goals");
   if (!col) return [];
-  const q = query(col, where("userId", "==", userId), orderBy("created_date", "desc"));
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const primary = query(col, where("userId", "==", userId), orderBy("created_date", "desc"));
+  const fallback = query(col, where("userId", "==", userId));
+  const snap = await safeGetDocs(primary, fallback);
+  const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  rows.sort((a, b) => toMillis(b.created_date) - toMillis(a.created_date));
+  return rows;
 }
 
 export async function getMoodEntries(userId, max = 30) {
   const col = getCol("mood_entries");
   if (!col) return [];
-  const q = query(
+  const primary = query(
     col,
     where("userId", "==", userId),
     orderBy("date", "desc"),
     limit(max)
   );
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const fallback = query(col, where("userId", "==", userId));
+  const snap = await safeGetDocs(primary, fallback);
+  const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  rows.sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+  return rows.slice(0, max);
 }
 
 export async function getFocusModules(userId) {
   const col = getCol("focus_modules");
   if (!col) return [];
-  const q = query(col, where("userId", "==", userId), orderBy("slot"));
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const primary = query(col, where("userId", "==", userId), orderBy("slot"));
+  const fallback = query(col, where("userId", "==", userId));
+  const snap = await safeGetDocs(primary, fallback);
+  const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  rows.sort((a, b) => Number(a.slot || 0) - Number(b.slot || 0));
+  return rows;
 }
 
 export async function getUserSettings(userId) {
