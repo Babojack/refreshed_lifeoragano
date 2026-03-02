@@ -24,9 +24,14 @@ export const AuthProvider = ({ children }) => {
   const loadProfile = async (uid) => {
     const db = getFirestoreDb();
     if (!db) return {};
-    const ref = doc(db, "users", uid);
-    const snap = await getDoc(ref);
-    return snap.exists() ? snap.data() : {};
+    try {
+      const ref = doc(db, "users", uid);
+      const snap = await getDoc(ref);
+      return snap.exists() ? snap.data() : {};
+    } catch (err) {
+      console.warn("Firestore users profile could not be loaded (check rules):", err?.code || err?.message);
+      return {};
+    }
   };
 
   const isLocalDev =
@@ -53,7 +58,11 @@ export const AuthProvider = ({ children }) => {
     const unsub = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
       if (user) {
-        setProfile(await loadProfile(user.uid));
+        try {
+          setProfile(await loadProfile(user.uid));
+        } catch (e) {
+          setProfile({});
+        }
       } else {
         setProfile(null);
       }
