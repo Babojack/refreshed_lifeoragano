@@ -318,6 +318,40 @@ export async function deleteFocusModule(id) {
   await deleteDoc(doc(db, "focus_modules", id));
 }
 
+// --- Feed posts ---
+export async function getFeedPosts() {
+  const col = getCol("feed_posts");
+  if (!col) return [];
+  const primary = query(col, orderBy("created_date", "desc"));
+  const fallback = query(col);
+  const snap = await safeGetDocs(primary, fallback);
+  const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  rows.sort((a, b) => toMillis(b.created_date) - toMillis(a.created_date));
+  return rows;
+}
+
+export async function createFeedPost(userId, data) {
+  const col = getCol("feed_posts");
+  if (!col) return null;
+  const ref = await addDoc(col, {
+    userId,
+    created_by: data.created_by ?? "User",
+    content: data.content ?? "",
+    post_type: data.post_type ?? "text",
+    status_emoji: data.status_emoji ?? "",
+    image_url: data.image_url ?? "",
+    likes: 0,
+    created_date: serverTimestamp(),
+  });
+  return { id: ref.id, userId, ...data, likes: 0, created_date: new Date() };
+}
+
+export async function deleteFeedPost(id) {
+  const db = getFirestoreDb();
+  if (!db) return;
+  await deleteDoc(doc(db, "feed_posts", id));
+}
+
 // --- Comments (parent_id, parent_type wie "project" oder "goal") ---
 export async function getComments(parentId, parentType) {
   const col = getCol("comments");

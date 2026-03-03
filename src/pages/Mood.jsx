@@ -417,6 +417,29 @@ export default function Mood() {
           <TileGroup title="Schlaf" items={SLEEP_ITEMS} selected={form.sleep} onSelect={v => setForm({ ...form, sleep: v })} />
           <TileGroup title="Stress" items={STRESS_ITEMS} selected={form.stress} onSelect={v => setForm({ ...form, stress: v })} />
 
+          {/* Gefühls-Tags auswählbar */}
+          <div className="bg-white border border-[#E8E8E0] rounded-2xl p-5">
+            <h3 className="font-black text-[#1A1A1A] text-sm mb-4 tracking-wide">Gefühls-Tags</h3>
+            <div className="flex flex-wrap gap-2">
+              {EMOTION_TAGS.map(tag => {
+                const isSelected = form.emotionTags.includes(tag.key);
+                return (
+                  <button
+                    key={tag.key}
+                    type="button"
+                    onClick={() => setForm({
+                      ...form,
+                      emotionTags: isSelected ? form.emotionTags.filter(t => t !== tag.key) : [...form.emotionTags, tag.key],
+                    })}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold transition-all ${isSelected ? "bg-[#FEF0EB] border-[#E85D26] text-[#E85D26]" : "border-[#E8E8E0] bg-[#F5F5F0] text-[#8A8A80] hover:border-[#E85D26]"}`}
+                  >
+                    <span>{tag.emoji}</span>{tag.key}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="bg-white border border-[#E8E8E0] rounded-2xl p-5 space-y-3">
             <div className="flex items-center gap-3">
               <input type="date" className="border border-[#E8E8E0] rounded-lg px-3 py-2.5 text-sm focus:outline-none bg-[#F5F5F0]"

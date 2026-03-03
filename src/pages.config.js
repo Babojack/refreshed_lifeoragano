@@ -49,7 +49,6 @@
  */
 import AndereModule from './pages/AndereModule';
 import BudgetModule from './pages/BudgetModule';
-import Diary from './pages/Diary';
 import Feed from './pages/Feed';
 import Goals from './pages/Goals';
 import Home from './pages/Home';
@@ -65,7 +64,6 @@ import __Layout from './Layout.jsx';
 export const PAGES = {
     "AndereModule": AndereModule,
     "BudgetModule": BudgetModule,
-    "Diary": Diary,
     "Feed": Feed,
     "Goals": Goals,
     "Home": Home,

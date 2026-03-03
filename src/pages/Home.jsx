@@ -1,13 +1,12 @@
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { CheckSquare, Target, FolderKanban, Smile, BookOpen, Rss, Zap, ArrowRight } from "lucide-react";
+import { CheckSquare, Target, FolderKanban, Smile, Rss, Zap, ArrowRight } from "lucide-react";
 
 const features = [
   { icon: CheckSquare, title: "Tasks", desc: "Organize your daily to-dos", page: "Tasks", color: "#E85D26" },
   { icon: Target, title: "Goals", desc: "Track long-term ambitions", page: "Goals", color: "#1A1A1A" },
   { icon: FolderKanban, title: "Projects", desc: "Manage your projects", page: "Projects", color: "#E85D26" },
   { icon: Smile, title: "Mood", desc: "Log how you feel daily", page: "Mood", color: "#1A1A1A" },
-  { icon: BookOpen, title: "Diary", desc: "Write your private thoughts", page: "Diary", color: "#E85D26" },
   { icon: Rss, title: "Feed", desc: "Share updates & achievements", page: "Feed", color: "#1A1A1A" },
 ];
 

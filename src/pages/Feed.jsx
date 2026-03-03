@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
+import { getFeedPosts, createFeedPost, deleteFeedPost } from "@/lib/firestoreService";
 import { Heart, Image, Type, Star, Trash2, X, Upload, MessageSquare, Send, ChevronDown, ChevronUp } from "lucide-react";
 
 const postTypes = [
@@ -21,14 +22,50 @@ export default function Feed() {
   const [openComments, setOpenComments] = useState({});
   const [newComment, setNewComment] = useState({});
 
+  const loadPosts = async () => {
+    setLoading(true);
+    try {
+      const list = await getFeedPosts();
+      setPosts(list);
+    } catch (e) {
+      setPosts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    setLoading(false);
+    loadPosts();
   }, []);
 
   const handleImageUpload = async () => {};
-  const createPost = async () => {};
+  const createPost = async () => {
+    if (!user?.uid || (!form.content?.trim() && !form.status_emoji)) return;
+    try {
+      const created = await createFeedPost(user.uid, {
+        content: form.content.trim() || form.status_emoji,
+        post_type: form.post_type,
+        status_emoji: form.status_emoji,
+        image_url: form.image_url,
+        created_by: user.name || user.email || "User",
+      });
+      if (created) {
+        setPosts((prev) => [created, ...prev]);
+        setForm({ content: "", image_url: "", status_emoji: "", status_text: "", post_type: "text" });
+      }
+    } catch (e) {
+      console.warn("Post fehlgeschlagen:", e);
+    }
+  };
   const toggleLike = async (_post) => {};
-  const deletePost = async (_postId) => {};
+  const deletePost = async (postId) => {
+    try {
+      await deleteFeedPost(postId);
+      setPosts((prev) => prev.filter((p) => p.id !== postId));
+    } catch (e) {
+      console.warn("Löschen fehlgeschlagen:", e);
+    }
+  };
   const isLiked = (_post) => false;
   const toggleComments = async (postId) => {
     setOpenComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
@@ -131,7 +168,7 @@ export default function Feed() {
       ) : posts.length === 0 ? (
         <div className="text-center py-16 bg-white border border-[#E8E8E0] rounded-xl">
           <div className="text-5xl mb-3">📢</div>
-          <p className="font-bold text-[#8A8A80] uppercase tracking-wider text-sm">Feed wird auf Firebase umgestellt. Bald wieder verfügbar.</p>
+          <p className="font-bold text-[#8A8A80] uppercase tracking-wider text-sm">Noch keine Posts. Erstelle den ersten!</p>
         </div>
       ) : (
         <div className="space-y-4">

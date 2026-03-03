@@ -6,7 +6,6 @@ import {
   Target,
   FolderKanban,
   Smile,
-  BookOpen,
   Rss,
   Zap,
   Menu,
@@ -21,7 +20,6 @@ const navItems = [
   { name: "Goals", page: "Goals", icon: Target },
   { name: "Projects", page: "Projects", icon: FolderKanban },
   { name: "Mood", page: "Mood", icon: Smile },
-  { name: "Diary", page: "Diary", icon: BookOpen },
   { name: "Feed", page: "Feed", icon: Rss },
   { name: "Andere Module", page: "AndereModule", icon: LayoutGrid },
 ];
