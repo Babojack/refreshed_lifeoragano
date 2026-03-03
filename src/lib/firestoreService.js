@@ -192,27 +192,41 @@ export async function deleteTask(id) {
 export async function getTasksByProject(userId, projectId) {
   const col = getCol("tasks");
   if (!col) return [];
-  const q = query(
+  const primary = query(
     col,
     where("userId", "==", userId),
     where("project_id", "==", projectId),
     orderBy("created_date", "desc")
   );
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const fallback = query(
+    col,
+    where("userId", "==", userId),
+    where("project_id", "==", projectId)
+  );
+  const snap = await safeGetDocs(primary, fallback);
+  const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  rows.sort((a, b) => toMillis(b.created_date) - toMillis(a.created_date));
+  return rows;
 }
 
 export async function getTasksByGoal(userId, goalId) {
   const col = getCol("tasks");
   if (!col) return [];
-  const q = query(
+  const primary = query(
     col,
     where("userId", "==", userId),
     where("goal_id", "==", goalId),
     orderBy("created_date", "desc")
   );
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const fallback = query(
+    col,
+    where("userId", "==", userId),
+    where("goal_id", "==", goalId)
+  );
+  const snap = await safeGetDocs(primary, fallback);
+  const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  rows.sort((a, b) => toMillis(b.created_date) - toMillis(a.created_date));
+  return rows;
 }
 
 // --- Goals ---
