@@ -412,11 +412,31 @@ export default function Mood() {
             <h2 className="font-black text-[#1A1A1A] text-sm tracking-widest uppercase">Gefühls-Tags</h2>
           </div>
           <div className="flex flex-wrap gap-2">
-            {EMOTION_TAGS.map(tag => (
-              <div key={tag.key} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#E8E8E0] bg-[#F5F5F0] text-xs font-bold text-[#8A8A80]">
-                <span>{tag.emoji}</span>{tag.key}
-              </div>
-            ))}
+            {EMOTION_TAGS.map((tag) => {
+              const isSelected = form.emotionTags.includes(tag.key);
+              return (
+                <button
+                  key={tag.key}
+                  type="button"
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      emotionTags: isSelected
+                        ? form.emotionTags.filter((t) => t !== tag.key)
+                        : [...form.emotionTags, tag.key],
+                    })
+                  }
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold transition-all ${
+                    isSelected
+                      ? "bg-[#FEF0EB] border-[#E85D26] text-[#E85D26]"
+                      : "border-[#E8E8E0] bg-[#F5F5F0] text-[#8A8A80] hover:border-[#E85D26]"
+                  }`}
+                >
+                  <span>{tag.emoji}</span>
+                  {tag.key}
+                </button>
+              );
+            })}
           </div>
         </div>
         <div>
@@ -425,7 +445,7 @@ export default function Mood() {
             className="w-full border border-[#E8E8E0] rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#1A1A1A] bg-[#F5F5F0] resize-none h-24"
             placeholder="Gedanken festhalten..."
             value={form.note}
-            onChange={e => setForm({ ...form, note: e.target.value })}
+            onChange={(e) => setForm({ ...form, note: e.target.value })}
           />
         </div>
       </div>
