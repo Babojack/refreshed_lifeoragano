@@ -283,6 +283,7 @@ export default function Mood() {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [moodError, setMoodError] = useState("");
   const [filter, setFilter] = useState("Alle");
   const [form, setForm] = useState({
     mood: "",
@@ -295,10 +296,19 @@ export default function Mood() {
   });
 
   const loadEntries = async () => {
-    if (!user?.uid) return;
-    const e = await getMoodEntries(user.uid);
-    setEntries(e);
-    setLoading(false);
+    if (!user?.uid) {
+      setLoading(false);
+      return;
+    }
+    try {
+      const e = await getMoodEntries(user.uid);
+      setEntries(Array.isArray(e) ? e : []);
+    } catch (err) {
+      setEntries([]);
+      console.warn("Mood-Einträge laden fehlgeschlagen:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -306,28 +316,39 @@ export default function Mood() {
   }, [user?.uid]);
 
   const createEntry = async () => {
-    if (!form.mood || !user?.uid) return;
+    if (!form.mood || !user?.uid) {
+      setMoodError("Bitte wähle eine Stimmung.");
+      return;
+    }
+    setMoodError("");
     const moodScore = { great: 5, good: 4, okay: 3, bad: 2, terrible: 1 };
     const tags = [];
     if (form.energy) tags.push(`energy:${form.energy}`);
     if (form.sleep) tags.push(`sleep:${form.sleep}`);
     if (form.stress) tags.push(`stress:${form.stress}`);
     form.emotionTags.forEach((t) => tags.push(`emotion:${t}`));
-    const created = await createMoodEntry(user.uid, {
-      mood: form.mood,
-      mood_score: moodScore[form.mood],
-      note: form.note,
-      date: form.date,
-      energy: form.energy,
-      sleep: form.sleep,
-      stress: form.stress,
-      emotion_tags: form.emotionTags,
-    });
-    if (created) {
-      const withTags = { ...created, tags };
-      setEntries((prev) => [withTags, ...prev]);
-      setForm({ mood: "", energy: "", sleep: "", stress: "", emotionTags: [], note: "", date: new Date().toISOString().slice(0, 10) });
-      setShowForm(false);
+    try {
+      const created = await createMoodEntry(user.uid, {
+        mood: form.mood,
+        mood_score: moodScore[form.mood] ?? 3,
+        note: form.note,
+        date: form.date,
+        energy: form.energy,
+        sleep: form.sleep,
+        stress: form.stress,
+        emotion_tags: form.emotionTags,
+      });
+      if (created) {
+        const withTags = { ...created, tags };
+        setEntries((prev) => [withTags, ...prev]);
+        setForm({ mood: "", energy: "", sleep: "", stress: "", emotionTags: [], note: "", date: new Date().toISOString().slice(0, 10) });
+        setShowForm(false);
+      } else {
+        setMoodError("Firebase nicht verfügbar. Bitte prüfe die Konfiguration.");
+      }
+    } catch (err) {
+      console.warn("Mood speichern fehlgeschlagen:", err);
+      setMoodError(err?.message || "Eintrag konnte nicht gespeichert werden. Bitte Firestore-Regeln prüfen.");
     }
   };
 
@@ -440,12 +461,15 @@ export default function Mood() {
             </div>
           </div>
 
+          {moodError && (
+            <p className="text-sm text-red-600 font-medium bg-red-50 border border-red-200 rounded-lg px-4 py-2">{moodError}</p>
+          )}
           <div className="bg-white border border-[#E8E8E0] rounded-2xl p-5 space-y-3">
             <div className="flex items-center gap-3">
               <input type="date" className="border border-[#E8E8E0] rounded-lg px-3 py-2.5 text-sm focus:outline-none bg-[#F5F5F0]"
                 value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
               <div className="flex gap-2 ml-auto">
-                <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm font-semibold text-[#8A8A80] hover:text-[#1A1A1A] rounded-lg hover:bg-[#F5F5F0] transition-colors uppercase tracking-wider">Abbrechen</button>
+                <button onClick={() => { setShowForm(false); setMoodError(""); }} className="px-4 py-2 text-sm font-semibold text-[#8A8A80] hover:text-[#1A1A1A] rounded-lg hover:bg-[#F5F5F0] transition-colors uppercase tracking-wider">Abbrechen</button>
                 <button onClick={createEntry} className="accent-btn" disabled={!form.mood}>SPEICHERN</button>
               </div>
             </div>

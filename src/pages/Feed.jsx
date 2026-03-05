@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { getFeedPosts, createFeedPost, deleteFeedPost } from "@/lib/firestoreService";
+import { uploadImage } from "@/lib/storageService";
 import { Heart, Image, Type, Star, Trash2, X, Upload, MessageSquare, Send, ChevronDown, ChevronUp } from "lucide-react";
 
 const postTypes = [
@@ -38,7 +39,20 @@ export default function Feed() {
     loadPosts();
   }, []);
 
-  const handleImageUpload = async () => {};
+  const handleImageUpload = async (e) => {
+    const file = e?.target?.files?.[0];
+    if (!file || !user?.uid) return;
+    setUploading(true);
+    try {
+      const url = await uploadImage(user.uid, file, "feed");
+      if (url) setForm((prev) => ({ ...prev, image_url: url }));
+    } catch (err) {
+      console.warn("Bild-Upload fehlgeschlagen:", err);
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  };
   const createPost = async () => {
     if (!user?.uid || (!form.content?.trim() && !form.status_emoji)) return;
     try {

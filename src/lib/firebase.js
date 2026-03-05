@@ -5,6 +5,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
@@ -20,6 +21,7 @@ const firebaseConfig = {
 let app = null;
 let db = null;
 let auth = null;
+let storage = null;
 let analytics = null;
 
 export function getFirebaseApp() {
@@ -60,6 +62,15 @@ export function getFirestoreDb() {
     db = getFirestore(a);
   }
   return db;
+}
+
+export function getStorageBucket() {
+  if (!storage) {
+    const a = getFirebaseApp();
+    if (!a) return null;
+    storage = getStorage(a);
+  }
+  return storage;
 }
 
 export { firebaseConfig };
