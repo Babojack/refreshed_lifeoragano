@@ -138,7 +138,9 @@ Stimmung / Mood (wie Base44 `MoodEntry`).
 
 ## 3. Security Rules (Beispiel)
 
-In Firebase Console → Firestore → Rules:
+In Firebase Console → Firestore → Rules einfügen. Oder Datei `firestore.rules` im Projekt verwenden und mit `firebase deploy --only firestore:rules` deployen.
+
+Wichtig: Bei **create** existiert `resource` nicht, nur `request.resource`. Daher sind `read` / `create` / `update, delete` getrennt.
 
 ```
 rules_version = '2';
@@ -148,24 +150,29 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     match /projects/{docId} {
-      allow read, write: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
     match /tasks/{docId} {
-      allow read, write: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
     match /goals/{docId} {
-      allow read, write: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
     match /mood_entries/{docId} {
-      allow read, write: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
     match /focus_modules/{docId} {
-      allow read, write: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
     match /feed_posts/{docId} {
       allow read: if request.auth != null;
@@ -173,8 +180,14 @@ service cloud.firestore {
       allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
     match /comments/{docId} {
-      allow read, write: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null;
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+    match /habits/{docId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
   }
 }
