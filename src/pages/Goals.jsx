@@ -6,7 +6,8 @@ import {
   updateGoal,
   deleteGoal,
 } from "@/lib/firestoreService";
-import { Plus, Target, Trash2, Star } from "lucide-react";
+import { uploadImage } from "@/lib/storageService";
+import { Plus, Target, Trash2, Star, Upload } from "lucide-react";
 import CardDetailModal from "@/components/CardDetailModal";
 
 const statusColor = {
@@ -28,7 +29,9 @@ export default function Goals() {
     target_date: "",
     progress: 0,
     status: "active",
+    cover_image: "",
   });
+  const [coverUploading, setCoverUploading] = useState(false);
 
   const loadGoals = async () => {
     if (!user?.uid) return;
@@ -40,6 +43,19 @@ export default function Goals() {
   useEffect(() => {
     loadGoals();
   }, [user?.uid]);
+
+  const onCoverSelect = async (e) => {
+    const file = e.target?.files?.[0];
+    if (!file || !user?.uid) return;
+    setCoverUploading(true);
+    try {
+      const url = await uploadImage(user.uid, file, "goals");
+      if (url) setForm((f) => ({ ...f, cover_image: url }));
+    } finally {
+      setCoverUploading(false);
+      e.target.value = "";
+    }
+  };
 
   const createGoalHandler = async () => {
     if (!form.title.trim() || !user?.uid) return;
@@ -53,6 +69,7 @@ export default function Goals() {
         target_date: "",
         progress: 0,
         status: "active",
+        cover_image: "",
       });
       setShowForm(false);
     }
@@ -101,6 +118,20 @@ export default function Goals() {
           <div className="bg-white border border-[#E8E8E0] rounded-xl p-6 mb-6 shadow-sm">
             <h3 className="font-bold text-[#1A1A1A] mb-4 uppercase text-sm tracking-wider">Create Goal</h3>
             <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <label className="cursor-pointer flex items-center gap-2 px-3 py-2 rounded-lg border border-[#E8E8E0] bg-[#F5F5F0] hover:bg-[#EBEBE5] text-sm font-medium text-[#1A1A1A]">
+                  <input type="file" accept="image/*" className="hidden" onChange={onCoverSelect} disabled={coverUploading} />
+                  {coverUploading ? (
+                    <span className="animate-spin w-4 h-4 border-2 border-[#E85D26] border-t-transparent rounded-full" />
+                  ) : (
+                    <Upload className="w-4 h-4 text-[#8A8A80]" />
+                  )}
+                  {form.cover_image ? "Bild ausgetauscht" : "Cover-Bild hochladen"}
+                </label>
+                {form.cover_image && (
+                  <img src={form.cover_image} alt="Cover" className="w-16 h-16 object-cover rounded-lg" />
+                )}
+              </div>
               <input
                 className="w-full border border-[#E8E8E0] rounded-lg px-4 py-3 text-sm font-medium focus:outline-none focus:border-[#1A1A1A] bg-[#F5F5F0]"
                 placeholder="Goal title *"
@@ -255,6 +286,7 @@ export default function Goals() {
             setSelectedGoal(updated);
             setGoals((prev) => prev.map((g) => (g.id === updated.id ? updated : g)));
           }}
+          updateGoal={updateGoal}
         />
       )}
     </>

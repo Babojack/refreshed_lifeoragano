@@ -356,14 +356,21 @@ export async function deleteFeedPost(id) {
 export async function getComments(parentId, parentType) {
   const col = getCol("comments");
   if (!col) return [];
-  const q = query(
+  const primary = query(
     col,
     where("parent_id", "==", parentId),
     where("parent_type", "==", parentType),
     orderBy("created_date", "desc")
   );
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const fallback = query(
+    col,
+    where("parent_id", "==", parentId),
+    where("parent_type", "==", parentType)
+  );
+  const snap = await safeGetDocs(primary, fallback);
+  const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  rows.sort((a, b) => toMillis(b.created_date) - toMillis(a.created_date));
+  return rows;
 }
 
 export async function createComment(userId, data) {

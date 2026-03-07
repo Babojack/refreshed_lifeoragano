@@ -20,11 +20,19 @@ service firebase.storage {
       allow read: if request.auth != null;
       allow write: if request.auth != null && request.auth.uid == userId;
     }
+    match /goals/{userId}/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    match /projects/{userId}/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
   }
 }
 ```
 
-Damit können eingeloggte Nutzer nur in ihrem eigenen Ordner `feed/{userId}/` Bilder hochladen und alle eingeloggten Nutzer können Feed-Bilder lesen.
+Damit können eingeloggte Nutzer in ihren Ordnern `feed/`, `goals/` und `projects/` Bilder hochladen; andere eingeloggte Nutzer können sie lesen.
 
 ## 3. Prüfen
 
